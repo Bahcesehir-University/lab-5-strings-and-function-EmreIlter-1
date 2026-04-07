@@ -83,35 +83,48 @@ public:
 // ---- Constructors ----
 
 MyString::MyString() {
+    data = "";
     // TODO: Initialize with empty string
 }
 
 MyString::MyString(const string& str) {
+    data = str ;
     // TODO: Initialize data with the given std::string
 }
 
 MyString::MyString(const char* str) {
+    data = str;
     // TODO: Initialize data with the given C-string
 }
 
 // ---- Getter ----
 
 string MyString::getData() const {
+    return data;
     // TODO: Return the internal string data
 }
 
 // ---- Basic String Operations ----
 
 int MyString::length() const {
+    return static_cast<int>(data.length());
     // TODO: Return the length of the string
 }
 
 char MyString::charAt(int index) const {
+    if(index < 0 || index >= static_cast<int>(data.length())){
+        throw std::out_of_range("Index out of range charAt");
+    }
+    return data[index];
     // TODO: Return character at given index
     // Throw std::out_of_range if index is invalid (negative or >= length)
 }
 
 MyString MyString::substring(int start, int len) const {
+    if(start < 0 || start >= static_cast<int>(data.length())){
+        throw std::out_of_range("Index out of range charAt");
+    }
+    return MyString(data.substr(start , len));
     // TODO: Return a substring starting at 'start' with length 'len'
     // Throw std::out_of_range if start is invalid (negative or >= length)
     // Hint: Use std::string::substr()
@@ -120,24 +133,37 @@ MyString MyString::substring(int start, int len) const {
 // ---- String Manipulation ----
 
 MyString MyString::toUpperCase() const {
+    string result = data;
+    transform(result.begin() , result.end() , result.begin() , [](unsigned char c){return toupper(c);});
+    return MyString(result);
     // TODO: Return a NEW MyString with all characters converted to upper case
     // Hint: Use std::transform with ::toupper
     // Do NOT modify the original object
 }
 
 MyString MyString::toLowerCase() const {
+    string result = data;
+    transform(result.begin() , result.end() , result.begin() , [](unsigned char c){return tolower(c);});
+    return MyString(result);
     // TODO: Return a NEW MyString with all characters converted to lower case
     // Hint: Use std::transform with ::tolower
     // Do NOT modify the original object
 }
 
 MyString MyString::trim() const {
+    size_t start = data.find_first_not_of("\t\n\r");
+    if(start == string::npos) return MyString("");
+    size_t end = data.find_last_not_of("\t\n\r");
+    return MyString(data.substr(start, end - start + 1));
     // TODO: Return a NEW MyString with leading and trailing whitespace removed
     // Whitespace includes: space, tab (\t), newline (\n), carriage return (\r)
     // Hint: Use find_first_not_of and find_last_not_of
 }
 
 MyString MyString::reverse() const {
+    string result = data;
+    std::reverse(result.begin(), result.end());
+    return MyString(result);
     // TODO: Return a NEW MyString with characters in reverse order
     // Hint: Use std::reverse on a copy
 }
@@ -145,11 +171,20 @@ MyString MyString::reverse() const {
 // ---- Search Operations ----
 
 int MyString::find(const MyString& target) const {
+    size_t pos = data.find(target.data);
+    if (pos == string::npos) return -1;
+    else return static_cast<int>(pos);
+    
     // TODO: Return index of first occurrence of target, or -1 if not found
     // Hint: Use std::string::find, check against string::npos
 }
 
 int MyString::count(char ch) const {
+    int cnt = 0 ;
+    for (char c : data){
+        if (c == ch) cnt++;
+    }
+    return cnt;
     // TODO: Return the number of occurrences of character ch in the string
 }
 
@@ -158,18 +193,22 @@ int MyString::count(char ch) const {
 // Same name "append", different parameter types.
 
 MyString MyString::append(const MyString& other) const {
+    return MyString(data + other.data);
     // TODO: Append another MyString to this one and return the result
 }
 
 MyString MyString::append(const char* cstr) const {
+    return MyString(data + string(cstr));
     // TODO: Append a C-string to this one and return the result
 }
 
 MyString MyString::append(char ch) const {
+    return MyString(data + ch);
     // TODO: Append a single character and return the result
 }
 
 MyString MyString::append(int number) const {
+    return MyString(data + to_string(number));
     // TODO: Append the string representation of an integer and return the result
     // Hint: Use std::to_string()
 }
@@ -179,10 +218,22 @@ MyString MyString::append(int number) const {
 // Same name "replace", different parameter types.
 
 MyString MyString::replace(char oldCh, char newCh) const {
+    string result = data;
+    for ( char& c : result){
+        if (c == oldCh) c = newCh;
+    }
+    return MyString(result);
     // TODO: Replace ALL occurrences of oldCh with newCh, return new MyString
 }
 
 MyString MyString::replace(const string& oldStr, const string& newStr) const {
+    string result = data;
+    size_t pos = 0;
+    while ((pos = result.find(oldStr, pos)) != string::npos) {
+        result.replace(pos, oldStr.length(), newStr);
+        pos += newStr.length();
+    }
+    return MyString(result);
     // TODO: Replace ALL occurrences of oldStr with newStr, return new MyString
     // WARNING: Be careful not to create an infinite loop!
     //          After each replacement, advance position past the new string.
@@ -191,31 +242,46 @@ MyString MyString::replace(const string& oldStr, const string& newStr) const {
 // ---- Operator Overloading ----
 
 MyString MyString::operator+(const MyString& other) const {
+    return MyString(data + other.data);
     // TODO: Concatenate two MyString objects and return the result
 }
 
 bool MyString::operator==(const MyString& other) const {
+     return data == other.data;
     // TODO: Return true if both MyString objects hold the same string
 }
 
 bool MyString::operator!=(const MyString& other) const {
+    return data != other.data;
     // TODO: Return true if the two MyString objects hold different strings
 }
 
 bool MyString::operator<(const MyString& other) const {
+    return data < other.data;
     // TODO: Lexicographic less-than comparison
 }
 
 bool MyString::operator>(const MyString& other) const {
+    return data > other.data;
     // TODO: Lexicographic greater-than comparison
 }
 
 char MyString::operator[](int index) const {
+      if (index < 0 || index >= static_cast<int>(data.length())) {
+        throw out_of_range("Index out of range in operator[]");
+    }
+    return data[index];
+}
     // TODO: Return character at index
     // Throw std::out_of_range if index is invalid (negative or >= length)
-}
 
 MyString MyString::operator*(int times) const {
+        if (times <= 0) return MyString("");
+    string result;
+    for (int i = 0; i < times; i++) {
+        result += data;
+    }
+    return MyString(result);
     // TODO: Repeat the string 'times' times and return the result
     // If times <= 0, return empty string
 }
@@ -223,11 +289,15 @@ MyString MyString::operator*(int times) const {
 // ---- Stream Overloading ----
 
 ostream& operator<<(ostream& os, const MyString& s) {
+    os << s.data;
+    return os;
     // TODO: Output the MyString's data to the stream
     // Return the stream to allow chaining: cout << a << b;
 }
 
 istream& operator>>(istream& is, MyString& s) {
+    is >> s.data;
+    return is;
     // TODO: Read a single word from the stream into the MyString
     // Return the stream to allow chaining: cin >> a >> b;
 }
